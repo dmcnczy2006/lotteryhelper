@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>抽奖结果</title>
+  <!-- 预加载关键资源 -->
+  <link rel="preload"
+        href="{{ url_for('static', filename='libs/bootstrap/bootstrap.min.css') }}"
+        as="style">
+  <link rel="preload"
+        href="{{ url_for('static', filename='libs/bootstrap/bootstrap.bundle.min.js') }}"
+        as="script">
+  <link rel="preload"
+        href="{{ url_for('static', filename='fonts/google-fonts.css') }}"
+        as="style">
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="{{ url_for('static', filename='libs/bootstrap/bootstrap.bundle.min.js') }}"
+          defer></script>
+  <!-- 动态 Favicon 根据配色 -->
+  <link rel="icon"
+        href="{{ url_for('static', filename='images/lightmode_favicon.ico') }}"
+        media="(prefers-color-scheme: light)">
+  <link rel="icon"
+        href="{{ url_for('static', filename='images/darkmode_favicon.ico') }}"
+        media="(prefers-color-scheme: dark)">
+  <!-- Google Fonts -->
+  <link href="{{ url_for('static', filename='fonts/google-fonts.css') }}"
+        rel="stylesheet"
+        media="print"
+        onload="this.media='all'">
+  <!-- Bootstrap CSS -->
+  <link href="{{ url_for('static', filename='libs/bootstrap/bootstrap.min.css') }}"
+        rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="{{ url_for('static', filename='libs/icons/bootstrap-icons.css') }}"
+        rel="stylesheet">
+  <!-- Base Styles -->
+  <link href="{{ url_for('static', filename='css/medieval.css') }}"
+        rel="stylesheet">
+  <style>
+    body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 0 20px;
+    }
+    h1 {
+    text-align: center;
+    }
+    ul.winner-list {
+    list-style: none;
+    padding: 0;
+    }
+    ul.winner-list li {
+    background-color: #f8f9fa;
+    margin: 8px 0;
+    padding: 10px;
+    border-left: 4px solid #28a745;
+    font-size: 18px;
+    }
+    .btn-back {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    }
+    .btn-back:hover {
+    background-color: #0069d9;
+    }
+  </style>
+</head>
+<body>
+  <h1>抽奖结果</h1>
+  <p>共抽取 {{ count }} 人，结果如下：</p>
+  <ul class="winner-list">
+    {% for w in winners %}
+    <li>{{ w }}</li>
+    {% endfor %}
+  </ul>
+  <a href="/" class="btn-back">返回重新抽奖</a>
+</body>
+</html>
