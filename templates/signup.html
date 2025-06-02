@@ -74,20 +74,7 @@
 <body>
   <h1>抽奖工具</h1>
 
-  <h2>参与者列表</h2>
-  <ul class="participant-list">
-    {% for p in participants %}
-    <li>{{ p }}</li>
-    {% endfor %}
-  </ul>
+  <h2>你是第 {{ no }} 位参与者！</h2>
 
-  <form method="post" action="/draw">
-    <label for="count">抽取人数：</label>
-    <input type="number" id="count" name="count" value="1" min="1" max="{{ participants|length }}" required>
-    <button type="submit" class="btn-draw">开始抽奖</button>
-  </form>
-  <form method="post" action="/clear" onsubmit="return confirm('确认清除所有参与者？');">
-    <button type="submit">清除所有人</button>
-  </form>
 </body>
 </html>

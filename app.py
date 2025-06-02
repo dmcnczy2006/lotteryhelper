@@ -1,58 +1,73 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 import random
+import qrcode
+import os
 
 app = Flask(__name__)
 
-
-# 读取 participants.txt 并返回一个列表
-def load_participants(file_path='participants.txt'):
-    participants = []
-    try:
-        with open(file_path, encoding='utf-8') as f:
-            for line in f:
-                name = line.strip()
-                if name:
-                    participants.append(name)
-    except FileNotFoundError:
-        # 如果文件不存在，就返回空列表
-        return []
-    return participants
+# 内存保存参与者（可改为数据库或写入文件）
+participants = set()
+ip_records = set()  # 存储已注册 IP
+n = 0
 
 
-@app.route('/', methods=['GET'])
+# 生成二维码，保存为 static/qrcode.png
+def generate_qrcode(link='http://localhost:5000/signup'):
+    img = qrcode.make(link)
+    path = 'static/qrcode.png'
+    os.makedirs('static', exist_ok=True)
+    img.save(path)
+    return path
+
+
+def get_client_ip():
+    # 支持通过代理（如 Nginx）传递的真实 IP
+    if request.environ.get('HTTP_X_FORWARDED_FOR'):
+        ip = request.environ['HTTP_X_FORWARDED_FOR'].split(',')[0]
+    else:
+        ip = request.remote_addr
+    return ip
+
+
+@app.route('/')
 def index():
-    """
-    首页：展示所有参与者，以及抽奖数量输入框。
-    """
-    participants = load_participants()
-    return render_template('index.html', participants=participants)
+    return render_template('index.html', participants=list(participants))
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    global n
+    client_ip = get_client_ip()
+    if client_ip in ip_records:
+        return "你已经领过号啦，每个设备只能参与一次！", 403
+    n += 1
+    participants.add(f"阿瓦隆{n}号")
+    ip_records.add(client_ip)
+    return render_template('signup.html', no=n)
 
 
 @app.route('/draw', methods=['POST'])
 def draw():
-    """
-    抽奖路由：从 participants 列表中随机抽取指定数量的参与者，跳转到结果页面。
-    """
-    participants = load_participants()
-    if not participants:
-        # 如果没有参与者，重定向回首页
-        return redirect(url_for('index'))
+    count = int(request.form.get('count', 1))
+    selected = random.sample(list(participants), min(count, len(participants)))
+    return render_template('result.html',
+                           count=min(count, len(participants)),
+                           winners=selected)
 
-    # 从表单获取要抽取的人数
-    try:
-        count = int(request.form.get('count', '1'))
-    except ValueError:
-        count = 1
 
-    # 边界检查，最少抽1人，最多抽 participants 列表长度
-    count = max(1, min(count, len(participants)))
+@app.route('/clear', methods=['POST'])
+def clear():
+    participants.clear()
+    ip_records.clear()
+    return redirect(url_for('index'))
 
-    # 用 random.sample 不重复地抽取
-    winners = random.sample(participants, count)
 
-    return render_template('result.html', winners=winners, count=count)
+@app.route('/qrcode')
+def show_qrcode():
+    link = request.host_url.rstrip('/') + '/signup'
+    path = generate_qrcode(link)
+    return render_template('qrcode.html', qrcode_path=path)
 
 
 if __name__ == '__main__':
-    # debug 模式下启动，便于开发调试
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

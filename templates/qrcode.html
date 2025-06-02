@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>扫码二维码</title>
+</head>
+<body>
+  <h1>扫码参与抽奖</h1>
+  <p>请用手机扫描下方二维码</p>
+  <img src="{{ url_for('static', filename='qrcode.png') }}" alt="二维码">
+  <p>或访问：<code>{{ request.host_url }}signup</code></p>
+  <a href="/">返回后台</a>
+</body>
+</html>
